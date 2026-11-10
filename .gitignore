@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+# calibration data and results stay on the lab PC (large / setup-specific)
+*.zdf
+data/
+calibration_outputs/
+zivid_eye_to_base_calib_data/
