@@ -9,7 +9,7 @@ Based on the Zivid hand-eye API (`detect_markers` + `calibrate_eye_to_hand`) and
 ## Requirements
 
 - Zivid SDK + `zivid` Python package **with the same version** (lab: 2.17.2), `zividsamples` (from `zivid-python-samples`, same tag), numpy < 2, scipy, opencv-python.
-- ROS 2 Humble (`rclpy`), robot EE pose published as `geometry_msgs/PoseStamped` in metres (default topic `/robot2/franka_robot_state_broadcaster/current_pose`, change with `--pose-topic`).
+- ROS 2 Humble (`rclpy`), robot EE pose published as `geometry_msgs/PoseStamped` in metres (default topic `/robot1/franka_robot_state_broadcaster/current_pose`, change with `--pose-topic`; subscribed BEST_EFFORT, `--reliable` to change).
 - Lab PC GPU: `source /opt/ros/humble/setup.bash && source ~/venvs/zivid/bin/activate`
 
 ## Marker

@@ -66,8 +66,9 @@ class EyeToBasePart3(Node):
             PoseStamped,
             args.pose_topic,
             self._link8_pose_cb,
-            10,
+            aruco_common.pose_qos(args.reliable),
         )
+        self.pose_topic = args.pose_topic
         self.get_logger().info(f"Subscribed to {args.pose_topic}")
 
         # Use one camera connection throughout this verification session.
@@ -108,7 +109,7 @@ class EyeToBasePart3(Node):
         q_xyzw = np.array([q.x, q.y, q.z, q.w], dtype=np.float64)
         q_norm = np.linalg.norm(q_xyzw)
         if q_norm < 1e-12:
-            raise ValueError("Received near-zero quaternion from /robot2/franka_robot_state_broadcaster/current_pose")
+            raise ValueError("Received near-zero quaternion from the robot pose topic")
 
         # ROS uses xyzw quaternion ordering; normalise before conversion.
         T = np.eye(4, dtype=np.float64)
@@ -205,7 +206,7 @@ class EyeToBasePart3(Node):
         '''
         # Show which Part 2 transform is loaded and when the next capture is due.
         panel = self._fit_to_panel(image)
-        pose_state = "ready" if self.base_T_hand is not None else "waiting for /robot2/franka_robot_state_broadcaster/current_pose"
+        pose_state = "ready" if self.base_T_hand is not None else f"waiting for {self.pose_topic}"
         lines = [
             f"Transform: {self.transform_path}",
             f"Robot pose: {pose_state}",

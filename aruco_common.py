@@ -19,6 +19,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import numpy as np
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
 from scipy.spatial.transform import Rotation as R
 import zivid
 
@@ -26,7 +27,7 @@ import zivid
 # Change them HERE (or on the command line) and every script follows.
 DEFAULT_MARKER_ID = 20
 DEFAULT_DICTIONARY = "aruco6x6_50"
-DEFAULT_POSE_TOPIC = "/robot2/franka_robot_state_broadcaster/current_pose"
+DEFAULT_POSE_TOPIC = "/robot1/franka_robot_state_broadcaster/current_pose"
 
 
 def add_common_args(parser: argparse.ArgumentParser, with_capture: bool = True) -> None:
@@ -52,6 +53,26 @@ def add_common_args(parser: argparse.ArgumentParser, with_capture: bool = True) 
                             help="Capture Assistant time budget in milliseconds")
         parser.add_argument("--pose-topic", default=DEFAULT_POSE_TOPIC,
                             help="PoseStamped topic with the robot EE pose (metres)")
+        parser.add_argument("--reliable", action="store_true",
+                            help="Subscribe to the pose topic with RELIABLE QoS "
+                                 "(default BEST_EFFORT, which matches the franka_robot_state_broadcaster)")
+
+
+def pose_qos(reliable: bool = False) -> QoSProfile:
+    '''
+    Inputs
+    - `reliable`: True for RELIABLE, False (default) for BEST_EFFORT.
+
+    Outputs
+    - QoS profile for the robot-pose subscription. BEST_EFFORT is compatible
+      with both best-effort and reliable publishers; RELIABLE only with reliable ones.
+    '''
+    return QoSProfile(
+        reliability=ReliabilityPolicy.RELIABLE if reliable else ReliabilityPolicy.BEST_EFFORT,
+        history=HistoryPolicy.KEEP_LAST,
+        depth=10,
+        durability=DurabilityPolicy.VOLATILE,
+    )
 
 
 def marker_dictionary(name: str):

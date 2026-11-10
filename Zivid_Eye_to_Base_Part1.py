@@ -54,8 +54,9 @@ class EyeToBasePart1(Node):
             PoseStamped,
             args.pose_topic,
             self._link8_pose_cb,
-            10,
+            aruco_common.pose_qos(args.reliable),
         )
+        self.pose_topic = args.pose_topic
         self.get_logger().info(f"Subscribed to {args.pose_topic}")
 
         # Reuse one camera connection for every manual capture.
@@ -109,7 +110,7 @@ class EyeToBasePart1(Node):
         q_xyzw = np.array([q.x, q.y, q.z, q.w], dtype=np.float64)
         q_norm = np.linalg.norm(q_xyzw)
         if q_norm < 1e-12:
-            raise ValueError("Received near-zero quaternion from /robot2/franka_robot_state_broadcaster/current_pose")
+            raise ValueError("Received near-zero quaternion from the robot pose topic")
 
         # ROS supplies an xyzw quaternion. Normalise it before forming the rotation.
         T = np.eye(4, dtype=np.float64)
@@ -156,7 +157,7 @@ class EyeToBasePart1(Node):
         ]
         # Show the cached robot position in millimetres for the operator's preview.
         if self.base_T_hand is None:
-            lines.append("Robot pose: waiting for /robot2/franka_robot_state_broadcaster/current_pose")
+            lines.append(f"Robot pose: waiting for {self.pose_topic}")
             color = (0, 0, 255)
         else:
             xyz_mm = 1000.0 * self.base_T_hand[:3, 3]
@@ -219,7 +220,7 @@ class EyeToBasePart1(Node):
         - Returns True only when the ArUco is detected and the pair is saved.
         '''
         if self.base_T_hand is None:
-            self.get_logger().warning("Robot pose not available yet. Waiting for /robot2/franka_robot_state_broadcaster/current_pose.")
+            self.get_logger().warning(f"Robot pose not available yet. Waiting for {self.pose_topic}.")
             return False
 
         # Capture with the session settings fixed in __init__.

@@ -38,7 +38,7 @@ class QuickCalib(Node):
         super().__init__("zivid_quick_calib")
         self.args = args
         self.base_T_hand_mm: np.ndarray | None = None
-        self.create_subscription(PoseStamped, args.pose_topic, self._pose_cb, 10)
+        self.create_subscription(PoseStamped, args.pose_topic, self._pose_cb, aruco_common.pose_qos(args.reliable))
         self.get_logger().info(f"Subscribed to {args.pose_topic}")
 
         self.Y = np.load(args.y)
