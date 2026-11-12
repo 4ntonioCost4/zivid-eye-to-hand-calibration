@@ -1,0 +1,35 @@
+# Pose slots for auto_calibration_board.py
+# FR3 joint configurations [rad], order fr3_joint1..fr3_joint7.
+# Empty slots (null) are ignored. Fill them automatically with:
+#   python3 auto_calibration_board.py record --poses calibration_poses.yaml
+# (answer "y" at the end if the score is PASS), or paste values by hand, e.g.
+#   - [0.0, -0.3, 0.0, -2.2, 0.0, 1.9, 0.78]
+# Tips: 15-20 calibration poses, board always facing the camera, large wrist rotations
+# (+-30-40 deg), different heights/positions over the workspace, 35-90 cm from the camera.
+# Record them in a sensible order: the robot moves in a straight line in JOINT space.
+calibration:
+  - null   # 1
+  - null   # 2
+  - null   # 3
+  - null   # 4
+  - null   # 5
+  - null   # 6
+  - null   # 7
+  - null   # 8
+  - null   # 9
+  - null   # 10
+  - null   # 11
+  - null   # 12
+  - null   # 13
+  - null   # 14
+  - null   # 15
+  - null   # 16
+  - null   # 17
+  - null   # 18
+# Poses NOT used in the solve, only to verify (board pose in the hand frame must stay constant)
+verification:
+  - null   # 1
+  - null   # 2
+  - null   # 3
+  - null   # 4
+  - null   # 5
