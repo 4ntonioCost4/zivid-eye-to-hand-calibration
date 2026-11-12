@@ -302,13 +302,14 @@ class Robot:
         if self.proc.is_alive():
             self.proc.terminate()
 
-    def wait_still(self, vel_tol: float = 0.01, still_time: float = 0.8, timeout: float = 15.0) -> dict:
+    def wait_still(self, vel_tol: float = 0.01, still_time: float = 0.8, timeout: float = 15.0,
+                   max_state_age: float = 0.3) -> dict:
         '''Wait until the trajectory is over and all joint speeds stay below vel_tol for still_time.'''
         t0, t_still = time.time(), None
         while time.time() - t0 < timeout:
             s = self.state()
-            if s["state_age"] > 0.3:
-                raise RuntimeError("Joint states stopped arriving")
+            if s["state_age"] > max_state_age:
+                raise RuntimeError(f"Joint states stopped arriving (last one {s['state_age']:.2f} s ago)")
             if not s["moving"] and np.max(np.abs(s["dq"])) < vel_tol:
                 t_still = t_still or time.time()
                 if time.time() - t_still >= still_time:
@@ -481,7 +482,7 @@ def run_record(args, out: Path) -> None:
                 break
             kind = "ver" if key == "v" else "cal"
             try:
-                robot.wait_still(timeout=5.0)
+                robot.wait_still(timeout=5.0, max_state_age=args.record_state_age)
                 frame, det, T, q = capture_sample(cam, robot, args.still_mm, args.still_deg)
             except RuntimeError as exc:
                 print(f"  NOT saved: {exc}")
@@ -593,6 +594,8 @@ def main() -> None:
     p.add_argument("--still-deg", type=float, default=0.05, help="Max TCP rotation during a capture [deg]")
     p.add_argument("--min-rate", type=float, default=300.0, help="Minimum joint state rate to allow motion [Hz]")
     p.add_argument("--force", action="store_true", help="Move even if the joint state rate is below --min-rate")
+    p.add_argument("--record-state-age", type=float, default=1.0,
+                   help="record mode: max age of the last joint state [s] (no torques are sent, so it can be loose)")
     p.add_argument("--return-first", action="store_true", help="Go back to the first pose at the end")
     p.add_argument("--max-res-mean-mm", type=float, default=1.5)
     p.add_argument("--max-res-max-mm", type=float, default=3.0)
